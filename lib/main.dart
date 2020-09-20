@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'QuestionBank.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +27,42 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Icon> scoreKeeper = [];
+  QuestionBank questionBank = new QuestionBank();
+
+  void checkAnswers(bool answer){
+    setState(() {
+
+      if(questionBank.isFinished()){
+        showAlert();
+        questionBank.reset();
+        scoreKeeper = [];
+      }else{
+        bool correctAnswer = questionBank.getQuestionAns();
+
+        if (correctAnswer == answer) {
+          scoreKeeper.add(Icon(
+            Icons.check,
+            color: Colors.green,
+          ));
+        } else {
+          scoreKeeper.add(Icon(
+            Icons.close,
+            color: Colors.red,
+          ));
+        }
+        questionBank.nextQuestion();
+      }
+    });
+  }
+
+  void showAlert() {
+    Alert(
+        context: context,
+        title: "Finished",
+        desc: "You have completed the quiz").show();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +75,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                questionBank.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -62,6 +100,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked true.
+                checkAnswers(true);
               },
             ),
           ),
@@ -80,11 +119,14 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked false.
+                checkAnswers(false);
               },
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        Row(
+          children: scoreKeeper,
+        ),
       ],
     );
   }
